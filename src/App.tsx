@@ -2,6 +2,8 @@ import { useState, useEffect } from "react";
 import reactLogo from "./assets/react.svg";
 import { invoke } from "@tauri-apps/api/core";
 import { getVersion } from "@tauri-apps/api/app";
+import { check } from "@tauri-apps/plugin-updater";
+import { relaunch } from "@tauri-apps/plugin-process";
 
 import "./App.css";
 
@@ -12,10 +14,47 @@ function App() {
 
   useEffect(() => {
     getVersion().then(setVersion);
+
+    // Run updater on app start
+    (async () => {
+      try {
+        const update = await check();
+
+        if (update) {
+          console.log(
+            `Update found: ${update.version} — notes: ${update.body}`
+          );
+
+          await update.downloadAndInstall((event) => {
+            switch (event.event) {
+              case "Started":
+                console.log(
+                  `Downloading ${event.data.contentLength} bytes...`
+                );
+                break;
+              case "Progress":
+                console.log(
+                  `Downloaded ${event.data.chunkLength} bytes`
+                );
+                break;
+              case "Finished":
+                console.log("Download complete.");
+                break;
+            }
+          });
+
+          console.log("Installing update...");
+          await relaunch();
+        } else {
+          console.log("No update found.");
+        }
+      } catch (err) {
+        console.error("Update check failed:", err);
+      }
+    })();
   }, []);
 
   async function greet() {
-    // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
     setGreetMsg(await invoke("greet", { name }));
   }
 
@@ -25,13 +64,13 @@ function App() {
 
       <div className="row">
         <a href="https://vitejs.dev" target="_blank">
-          <img src="/vite.svg" className="logo vite" alt="Vite logo"/>
+          <img src="/vite.svg" className="logo vite" alt="Vite logo" />
         </a>
         <a href="https://tauri.app" target="_blank">
-          <img src="/tauri.svg" className="logo tauri" alt="Tauri logo"/>
+          <img src="/tauri.svg" className="logo tauri" alt="Tauri logo" />
         </a>
         <a href="https://reactjs.org" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo"/>
+          <img src={reactLogo} className="logo react" alt="React logo" />
         </a>
       </div>
       <p>Click on the Tauri, Vite, and React logos to learn more.</p>
