@@ -13,45 +13,46 @@ function App() {
   const [version, setVersion] = useState("");
 
   useEffect(() => {
-    getVersion().then(setVersion);
-
-    // Run updater on app start
     (async () => {
       try {
         const update = await check();
-
         if (update) {
           console.log(
-            `Update found: ${update.version} — notes: ${update.body}`
+            `found update ${update.version} from ${update.date} with notes ${update.body}`
           );
+
+          let downloaded = 0;
+          let contentLength = 0;
 
           await update.downloadAndInstall((event) => {
             switch (event.event) {
               case "Started":
-                console.log(
-                  `Downloading ${event.data.contentLength} bytes...`
-                );
+                contentLength = event.data.contentLength ?? 0;
+                console.log(`started downloading ${contentLength} bytes`);
                 break;
               case "Progress":
-                console.log(
-                  `Downloaded ${event.data.chunkLength} bytes`
-                );
+                downloaded += event.data.chunkLength;
+                console.log(`downloaded ${downloaded} of ${contentLength}`);
                 break;
               case "Finished":
-                console.log("Download complete.");
+                console.log("download finished");
                 break;
             }
           });
 
-          console.log("Installing update...");
+          console.log("update installed");
           await relaunch();
         } else {
-          console.log("No update found.");
+          console.log("No update available");
         }
-      } catch (err) {
-        console.error("Update check failed:", err);
+      } catch (e) {
+        console.error("Update check failed", e);
       }
     })();
+  }, []);
+
+  useEffect(() => {
+    getVersion().then(setVersion);
   }, []);
 
   async function greet() {
@@ -61,6 +62,7 @@ function App() {
   return (
     <main className="container">
       <h1>Welcome to Tauri + React</h1>
+      <h2>Update test</h2>
 
       <div className="row">
         <a href="https://vitejs.dev" target="_blank">
