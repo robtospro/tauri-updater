@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import { invoke } from "@tauri-apps/api/core";
 import { getVersion } from "@tauri-apps/api/app";
 import { check } from "@tauri-apps/plugin-updater";
 import { relaunch } from "@tauri-apps/plugin-process";
@@ -9,7 +8,7 @@ import type { Update } from "@tauri-apps/plugin-updater";
 import "./App.css";
 
 function App() {
-  const isDev = import.meta.env.MODE === "development";
+  // const isDev = import.meta.env.MODE === "development";
   const [version, setVersion] = useState("");
   const [updateExists, setUpdateExists] = useState(false);
   const [updateInfo, setUpdateInfo] = useState<Update | null>(null);
@@ -30,7 +29,7 @@ function App() {
           setUpdateInfo({ version: currentVersion } as Update);
         }
       } catch (e) {
-        toast.error("❌ Update check failed:", e);
+        toast.error("❌ Update check failed:");
       }
     })();
   }, []);
@@ -40,10 +39,6 @@ function App() {
     getVersion().then(setVersion);
   }, []);
 
-  // Example greet function
-  async function greet() {
-    setGreetMsg(await invoke("greet", { name }));
-  }
 
   return (
     <>
