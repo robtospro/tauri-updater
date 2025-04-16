@@ -39,7 +39,10 @@
       "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IEVBRUNENzA5RTNCOTgyNEEKUldSS2dybmpDZGZzNnA4bEhSQ29VbFVhZHRZWDYrOVoyRksyNzcrN3M2UGxVOTFtNTFydXE4NEkK",
       "endpoints": [
         "https://github.com/robtospro/tauri-updater/releases/latest/download/latest.json"
-      ]
+      ],
+      "windows": {
+        "installMode": "quiet"
+      }
     }
   }
 }
